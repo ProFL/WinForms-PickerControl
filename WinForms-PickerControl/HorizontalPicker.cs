@@ -21,12 +21,17 @@
 //SOFTWARE.
 
 using System;
-using System.Diagnostics;
+using System.Collections;
+using System.ComponentModel;
+using System.ComponentModel.Design;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Windows.Forms.Design;
+using System.Diagnostics;
 
 namespace PickerControl
 {
+    [Designer(typeof(Design.HorizontalPickerDesigner), typeof(IRootDesigner))]
     public class HorizontalPicker<T> : Picker<T>
     {
         public static event EventHandler AllItemCountChanged;

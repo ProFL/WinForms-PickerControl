@@ -38,6 +38,7 @@
     <Compile Include="FontBuilder.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="HorizontalPickerDesigner.cs" />
     <Compile Include="Picker.cs">
       <SubType>Component</SubType>
     </Compile>
