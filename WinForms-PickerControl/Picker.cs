@@ -5,7 +5,7 @@ namespace PickerControl
 {
     public abstract partial class Picker<T> : Control
     {
-        public event EventHandler ItemPicked;
+        public abstract event EventHandler ItemPicked;
         public event EventHandler SelectedIndexChanged;
 
         public PickerList Items { get; set; }
@@ -20,7 +20,16 @@ namespace PickerControl
             set
             {
                 _SelectedIndex = value;
+                Refresh();
                 SelectedIndexChanged?.Invoke(this, null);
+            }
+        }
+
+        public T SelectedItem
+        {
+            get
+            {
+                return Items[SelectedIndex];
             }
         }
 
@@ -28,10 +37,10 @@ namespace PickerControl
         public int DisplayItemSpacing { get; set; }
         public FontBuilder FontDetails { get; set; }
 
-        public Picker() : base() {}
-        public Picker(string text) : base(text) {}
-        public Picker(Control parent, string text) : base(parent, text) {}
-        public Picker(string text, int left, int top, int width, int height) : base(text, left, top, width, height) {}
+        public Picker() : base() { }
+        public Picker(string text) : base(text) { }
+        public Picker(Control parent, string text) : base(parent, text) { }
+        public Picker(string text, int left, int top, int width, int height) : base(text, left, top, width, height) { }
         public Picker(Control parent, string text, int left, int top, int width, int height) : base(parent, text, left, top, width, height) { }
     }
 }

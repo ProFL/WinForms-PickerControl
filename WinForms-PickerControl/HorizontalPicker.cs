@@ -59,6 +59,8 @@ namespace PickerControl
             }
         }
 
+        public override event EventHandler ItemPicked;
+
         public Size ItemBoxSize
         {
             get
@@ -92,6 +94,11 @@ namespace PickerControl
                 else if ((_CurrentHoverDirection & MouseHoverDirection.Far) == 0 && timerHover.Interval != 1000)
                 {
                     timerHover.Interval = 1000;
+                }
+
+                if (timerHover.Enabled == false)
+                {
+                    timerHover.Start();
                 }
             }
         }
@@ -193,6 +200,7 @@ namespace PickerControl
                 Refresh();
 
                 CurrentHoverDirection = MouseHoverDirection.None;
+                timerHover.Stop();
             }
         }
         protected void OnMouseHover(object sender, EventArgs e)
