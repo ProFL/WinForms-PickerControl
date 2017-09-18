@@ -22,40 +22,17 @@
 
 using System;
 using System.Windows.Forms;
-using System.Drawing;
 
 namespace PickerControl
 {
     class TestForm : Form
     {
-        private HorizontalPicker<string> p;
-
-        public void InitializeComponents()
-        {
-            p = new HorizontalPicker<string>(0, 0, 500, 500);
-
-            p.Items.ItemAdded += (sender, e) =>
-            {
-                HorizontalPicker<string>.AllItemCount++;
-            };
-
-            p.Items.Add("TAB");
-            p.Items.Add("Q");
-            p.Items.Add("W");
-            p.Items.Add("E");
-            p.Items.Add("R");
-            p.Items.Add("T");
-            p.Items.Add("Y");
-
-            Controls.Add(p);
-        }
+        private HorizontalPicker<string> horizontalPicker;
+        private TextBox textBox;
 
         public TestForm() : base()
         {
-            Size = new Size(1000, 1000);
-
-            BackColor = Color.Black;
-            InitializeComponents();
+            InitializeComponent();
         }
 
         [STAThread]
@@ -64,6 +41,55 @@ namespace PickerControl
             TestForm t = new TestForm();
 
             Application.Run(t);
+        }
+
+        private void InitializeComponent()
+        {
+            this.textBox = new System.Windows.Forms.TextBox();
+            this.SuspendLayout();
+            // 
+            // textBox
+            // 
+            this.textBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
+            this.textBox.Location = new System.Drawing.Point(0, 0);
+            this.textBox.Margin = new System.Windows.Forms.Padding(0);
+            this.textBox.Name = "textBox";
+            this.textBox.Size = new System.Drawing.Size(500, 35);
+            this.textBox.TabIndex = 0;
+            this.textBox.Text = ": ";
+            // 
+            // TestForm
+            // 
+            this.BackColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.ClientSize = new System.Drawing.Size(500, 161);
+            this.Controls.Add(this.textBox);
+            this.Name = "TestForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.Text = "TestForm";
+            this.ResumeLayout(false);
+            this.PerformLayout();
+            //
+            // horizontalPicker
+            //
+            horizontalPicker = new HorizontalPicker<string>(0, 25, 500, 500);
+            horizontalPicker.Items.ItemAdded += (sender, e) =>
+            {
+                HorizontalPicker<string>.AllItemCount++;
+            };
+            horizontalPicker.Items.Add("TAB");
+            horizontalPicker.Items.Add("Q");
+            horizontalPicker.Items.Add("W");
+            horizontalPicker.Items.Add("E");
+            horizontalPicker.Items.Add("R");
+            horizontalPicker.Items.Add("T");
+            horizontalPicker.Items.Add("Y");
+            horizontalPicker.ItemPicked += (sender, e) =>
+            {
+                textBox.Text += horizontalPicker.SelectedItem + " ";
+                this.Refresh();
+            };
+            Controls.Add(horizontalPicker);
+            
         }
     }
 }
