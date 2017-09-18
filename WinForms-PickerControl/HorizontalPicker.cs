@@ -1,4 +1,4 @@
-﻿//MIT License
+//MIT License
 
 //Copyright (c) 2017 Pedro Linhares
 
@@ -59,7 +59,44 @@ namespace PickerControl
                 LargestWordLengthChanged?.Invoke(null, null);
             }
         }
-        public const float FontReductionFactor = 0.50f;
+
+        public Size ItemBoxSize
+        {
+            get
+            {
+                return new Size((int)(LargestWordLength * Font.Size), (int)Font.Size);
+            }
+        }
+
+        [Flags]
+        protected enum MouseHoverDirection
+        {
+            None = 0x00,
+            Left = 1 << 1,
+            Right = 1 << 2,
+            Far = 1 << 3,
+        }
+        protected MouseHoverDirection _CurrentHoverDirection;
+        protected MouseHoverDirection CurrentHoverDirection
+        {
+            get
+            {
+                return _CurrentHoverDirection;
+            }
+            set
+            {
+                _CurrentHoverDirection = value;
+                if ((_CurrentHoverDirection & MouseHoverDirection.Far) != 0 && timerHover.Interval != 500)
+                {
+                    timerHover.Interval = 500;
+                }
+                else if ((_CurrentHoverDirection & MouseHoverDirection.Far) == 0 && timerHover.Interval != 1000)
+                {
+                    timerHover.Interval = 1000;
+                }
+            }
+        }
+        protected Timer timerHover;
 
         protected void BaseInit()
         {
@@ -68,10 +105,13 @@ namespace PickerControl
             DisplayItemSpacing = 2;
             _SelectedIndex = 0;
             FontDetails = new FontBuilder(DefaultFont.FontFamily.ToString(), FontStyle.Regular);
+            timerHover = new Timer();
 
             Items.ItemAdded += OnItemAdded;
             AllItemCountChanged += OnAllItemCountChanged;
             LargestWordLengthChanged += OnLargestWordLengthChanged;
+            timerHover.Tick += OnTimerHoverTick;
+            MouseHover += OnMouseHover;
         }
 
         public HorizontalPicker() : base()
@@ -84,6 +124,16 @@ namespace PickerControl
             BaseInit();
         }
 
+        protected bool CursorIsInRight()
+        {
+            return (Cursor.Position.X >= Width / 2 + ItemBoxSize.Width);
+        }
+
+        protected bool CursorIsInLeft()
+        {
+            return (Cursor.Position.X <= Width / 2 - ItemBoxSize.Width);
+        }
+
         protected void OnItemAdded(object sender, EventArgs e)
         {
             if (Items.Count == 1)
@@ -91,7 +141,6 @@ namespace PickerControl
                 SelectedIndex = 0;
             }
         }
-
         protected override void OnSizeChanged(EventArgs e)
         {
             base.OnSizeChanged(e);
@@ -101,7 +150,6 @@ namespace PickerControl
                 Font = FontDetails.Build(this, LargestWordLength);
             }
         }
-
         protected void OnAllItemCountChanged(object sender, EventArgs e)
         {
             foreach (var item in Items)
@@ -112,11 +160,94 @@ namespace PickerControl
                 }
             }
         }
-
         protected void OnLargestWordLengthChanged(object sender, EventArgs e)
         {
             Font = FontDetails.Build(this, LargestWordLength);
             Refresh();
+        }
+        protected void OnSelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (SelectedIndex < 0)
+            {
+                _SelectedIndex = Items.Count + _SelectedIndex;
+            }
+        }
+        protected void OnTimerHoverTick(object sender, EventArgs e)
+        {
+            if (CurrentHoverDirection != MouseHoverDirection.None)
+            {
+                if ((CurrentHoverDirection & MouseHoverDirection.Right) != 0)
+                {
+                    if (CursorIsInRight())
+                    {
+                        SelectedIndex++;
+                    }
+                }
+                else
+                {
+                    if (CursorIsInLeft())
+                    {
+                        SelectedIndex--;
+                    }
+                }
+                Refresh();
+
+                CurrentHoverDirection = MouseHoverDirection.None;
+            }
+        }
+        protected void OnMouseHover(object sender, EventArgs e)
+        {
+            var pos = Cursor.Position;
+            if (CursorIsInRight())
+            {
+                if (timerHover.Enabled && ((CurrentHoverDirection & (MouseHoverDirection.Right | MouseHoverDirection.Far)) != 0))
+                {
+                    return;
+                }
+                else
+                {
+                    if (timerHover.Enabled && (CurrentHoverDirection & MouseHoverDirection.Right) == 0)
+                    {
+                        timerHover.Stop();
+                    }
+
+                    CurrentHoverDirection |= MouseHoverDirection.Right;
+                    if (pos.X >= Width / 2 + 2 * ItemBoxSize.Width)
+                    {
+                        CurrentHoverDirection |= MouseHoverDirection.Far;
+                    }
+
+                    if (!timerHover.Enabled)
+                    {
+                        timerHover.Start();
+                    }
+                }
+            }
+            else if (CursorIsInLeft())
+            {
+                if (timerHover.Enabled && ((CurrentHoverDirection & (MouseHoverDirection.Left | MouseHoverDirection.Far)) != 0))
+                {
+                    return;
+                }
+                else
+                {
+                    if (timerHover.Enabled && (CurrentHoverDirection & MouseHoverDirection.Left) == 0)
+                    {
+                        timerHover.Stop();
+                    }
+
+                    CurrentHoverDirection |= MouseHoverDirection.Left;
+                    if (pos.X <= Width / 2 + 2 * ItemBoxSize.Width)
+                    {
+                        CurrentHoverDirection |= MouseHoverDirection.Far;
+                    }
+
+                    if (!timerHover.Enabled)
+                    {
+                        timerHover.Start();
+                    }
+                }
+            }
         }
 
         [Conditional("DEBUG")]
