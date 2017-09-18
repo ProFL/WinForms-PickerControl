@@ -5,6 +5,7 @@ namespace PickerControl
 {
     public abstract partial class Picker<T> : Control
     {
+        public event EventHandler ItemPicked;
         public event EventHandler SelectedIndexChanged;
 
         public PickerList Items { get; set; }

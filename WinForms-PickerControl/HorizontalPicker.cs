@@ -1,4 +1,4 @@
-//MIT License
+﻿//MIT License
 
 //Copyright (c) 2017 Pedro Linhares
 
@@ -24,7 +24,6 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
-
 
 namespace PickerControl
 {
@@ -110,15 +109,16 @@ namespace PickerControl
             Items.ItemAdded += OnItemAdded;
             AllItemCountChanged += OnAllItemCountChanged;
             LargestWordLengthChanged += OnLargestWordLengthChanged;
+            SelectedIndexChanged += OnSelectedIndexChanged;
             timerHover.Tick += OnTimerHoverTick;
             MouseHover += OnMouseHover;
+            MouseClick += OnMouseClick;
+            //MouseWheel += OnMouseWheel;
         }
-
         public HorizontalPicker() : base()
         {
             BaseInit();
         }
-
         public HorizontalPicker(int left, int top, int width, int height) : base("", left, top, width, height)
         {
             BaseInit();
@@ -247,6 +247,24 @@ namespace PickerControl
                         timerHover.Start();
                     }
                 }
+            }
+        }
+        protected void OnMouseClick(object sender, EventArgs e)
+        {
+            var cursorPos = Cursor.Position;
+            var centerBoxLeft = Width / 2 - ItemBoxSize.Width / 2;
+
+            if (cursorPos.X >= centerBoxLeft && cursorPos.Y <= centerBoxLeft + ItemBoxSize.Width)
+            {
+                ItemPicked?.Invoke(this, null);
+            }
+            else if (cursorPos.X < centerBoxLeft)
+            {
+                SelectedIndex--;
+            }
+            else if (cursorPos.X > centerBoxLeft + ItemBoxSize.Width)
+            {
+                SelectedIndex++;
             }
         }
 
